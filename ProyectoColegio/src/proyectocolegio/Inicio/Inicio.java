@@ -4,13 +4,20 @@
  */
 package proyectocolegio.Inicio;
 
+import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import proyectoColegioReportes.KardexService;
+
 /**
  *
  * @author Angel
  */
 public class Inicio extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Inicio.class.getName());
+
+    private static final Logger logger = Logger.getLogger(Inicio.class.getName());
 
     /**
      * Creates new form Inicio
@@ -28,21 +35,79 @@ public class Inicio extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jButtonImprimirKardex = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Inicio");
+
+        jButtonImprimirKardex.setText("Imprimir Kárdex");
+        jButtonImprimirKardex.addActionListener(this::jButtonImprimirKardexActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(jButtonImprimirKardex, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(jButtonImprimirKardex, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(240, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButtonImprimirKardexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonImprimirKardexActionPerformed
+        String alumnoInput = JOptionPane.showInputDialog(this, "ID del alumno:");
+        if (alumnoInput == null || alumnoInput.isBlank()) {
+            return;
+        }
+        String grupoInput = JOptionPane.showInputDialog(this, "ID del grupo:");
+        if (grupoInput == null || grupoInput.isBlank()) {
+            return;
+        }
+        String ciclo = JOptionPane.showInputDialog(this, "Ciclo escolar (ej. 2025-2026):");
+        if (ciclo == null || ciclo.isBlank()) {
+            return;
+        }
+
+        int idAlumno;
+        int idGrupo;
+        try {
+            idAlumno = Integer.parseInt(alumnoInput.trim());
+            idGrupo = Integer.parseInt(grupoInput.trim());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Los ID deben ser numéricos.", "Datos inválidos", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Guardar Kárdex PDF");
+        chooser.setSelectedFile(new File("kardex.pdf"));
+        int result = chooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File destino = chooser.getSelectedFile();
+        if (!destino.getName().toLowerCase().endsWith(".pdf")) {
+            destino = new File(destino.getAbsolutePath() + ".pdf");
+        }
+        KardexService service = new KardexService();
+        try {
+            service.generarKardexPDF(idAlumno, idGrupo, ciclo.trim(), destino.getAbsolutePath());
+            JOptionPane.showMessageDialog(this, "Kárdex generado en: " + destino.getAbsolutePath(), "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Error generando kárdex", ex);
+            JOptionPane.showMessageDialog(this, "Error generando kárdex: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButtonImprimirKardexActionPerformed
 
     /**
      * @param args the command line arguments
@@ -51,7 +116,7 @@ public class Inicio extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
@@ -70,5 +135,6 @@ public class Inicio extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonImprimirKardex;
     // End of variables declaration//GEN-END:variables
 }
